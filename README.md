@@ -18,12 +18,6 @@
 | `auth-token` | 否 | Claude 请求使用的鉴权 Token |
 | `model` | 否 | Claude 请求使用的模型名 |
 
-## 输出参数
-
-| 名称 | 说明 |
-| --- | --- |
-| `version` | 安装后的 Claude CLI 版本号 |
-
 ## 使用示例
 
 ```yaml

@@ -14,29 +14,10 @@ inputs:
   model:
     description: 'Model name to use for Claude requests.'
     required: false
-outputs:
-  version:
-    description: 'Installed Claude CLI version.'
-    value: ${{ steps.meta.outputs.version }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Cache Claude
-      id: cache-claude
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.local/bin/claude
-          ~/.local/share/claude
-        key: ${{ runner.os }}-cache-claude-260419
-
-    - name: Install Claude
-      if: steps.cache-claude.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        curl -fsSL https://claude.ai/install.sh | bash
-
     - name: echo env
       shell: bash
       if: ${{ inputs['auth-token'] != '' }}
@@ -56,11 +37,20 @@ runs:
         echo IS_SANDBOX=1 >> $GITHUB_ENV
         echo "~/.local/bin" >> "$GITHUB_PATH"
 
-    - name: Get meta
-      id: meta
+    - name: Cache Claude
+      id: cache-claude
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.local/bin/claude
+          ~/.local/share/claude
+        key: ${{ runner.os }}-cache-claude-260419
+
+    - name: Install Claude
+      if: steps.cache-claude.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        echo version="$(claude -v)" >> $GITHUB_OUTPUT
+        curl -fsSL https://claude.ai/install.sh | bash
 
     - name: Cache Config
       uses: actions/cache@v4
