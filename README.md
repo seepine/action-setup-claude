@@ -17,6 +17,7 @@
 | `base-url` | 否 | Anthropic API 的 Base URL |
 | `auth-token` | 否 | Claude 请求使用的鉴权 Token |
 | `model` | 否 | Claude 请求使用的模型名 |
+| `cache-key` | 否 | Claude 数据缓存key |
 
 ## 使用示例
 
