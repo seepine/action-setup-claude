@@ -1,0 +1,72 @@
+name: 'action-setup-claude'
+description: 'Setup Claude CLI and optional Anthropic environment variables'
+branding:
+  icon: package
+  color: orange
+
+inputs:
+  base-url:
+    description: 'Base URL for the Anthropic API.'
+    required: false
+  auth-token:
+    description: 'Auth token used to authenticate Claude CLI requests.'
+    required: false
+  model:
+    description: 'Model name to use for Claude requests.'
+    required: false
+outputs:
+  version:
+    description: 'Installed Claude CLI version.'
+    value: ${{ steps.meta.outputs.version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Claude
+      id: cache-claude
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.local/bin/claude
+          ~/.local/share/claude
+        key: ${{ runner.os }}-cache-claude-260419
+
+    - name: Install Claude
+      if: steps.cache-claude.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        curl -fsSL https://claude.ai/install.sh | bash
+
+    - name: echo env
+      shell: bash
+      if: ${{ inputs['auth-token'] != '' }}
+      run: |
+        echo ANTHROPIC_BASE_URL=${{ inputs['base-url'] }} >> $GITHUB_ENV
+        echo ANTHROPIC_AUTH_TOKEN=${{ inputs['auth-token'] }} >> $GITHUB_ENV
+        echo ANTHROPIC_MODEL=${{ inputs.model }} >> $GITHUB_ENV
+
+        echo ANTHROPIC_DEFAULT_OPUS_MODEL=${{ inputs.model }} >> $GITHUB_ENV
+        echo ANTHROPIC_DEFAULT_SONNET_MODEL=${{ inputs.model }} >> $GITHUB_ENV
+        echo ANTHROPIC_DEFAULT_HAIKU_MODEL=${{ inputs.model }} >> $GITHUB_ENV
+        echo ANTHROPIC_SMALL_FAST_MODEL=${{ inputs.model }} >> $GITHUB_ENV
+
+    - name: echo bin path
+      shell: bash
+      run: |
+        echo IS_SANDBOX=1 >> $GITHUB_ENV
+        echo "~/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Get meta
+      id: meta
+      shell: bash
+      run: |
+        echo version="$(claude -v)" >> $GITHUB_OUTPUT
+
+    - name: Cache Config
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.agents
+          ~/.claude
+          .claude.json
+        key: ${{ runner.os }}-cache-config-260419
